@@ -5,7 +5,6 @@
 package vue;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagLayout;
@@ -14,7 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.LineBorder;
 import modele.Labyrinthe;
 import modele.MoteurJeu;
 import modele.ResultatRecherche;
@@ -60,8 +58,9 @@ public class frame extends JFrame {
             PanneauJeu panneauJeu = fenetre.getPanneauJeu();
 
             ResultatRecherche resultat = moteurJeu.obtenirIndice();
+            
             //Animation de la recherche
-            panneauJeu.animerRecherche(resultat.getOrdreExploration(), resultat.getChemin(), resultat, fenetre, null);
+            panneauJeu.animerRecherche(MoteurJeu.Algorithme.DIJKSTRA, resultat.getOrdreExploration(), resultat.getChemin(), resultat, fenetre, null);
         });
 
         this.setSize(615, 550);

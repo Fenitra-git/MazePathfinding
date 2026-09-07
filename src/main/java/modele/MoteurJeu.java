@@ -52,7 +52,7 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
                 resultat = AStar.calculerChemin(
                     labyrinthe.getObstacles(),
                     joueur.getPosition(),
-                    labyrinthe.getSortie(),
+                    labyrinthe.getSortie()
                 );
                 nomAlgorithme = "A*";
                 break;
