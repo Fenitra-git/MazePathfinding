@@ -13,6 +13,7 @@ public class Main {
 
         //DatabaseManager.initialiser();
 
+        
         SwingUtilities.invokeLater(() -> {
 
             // Création du labyrinthe et du moteur
