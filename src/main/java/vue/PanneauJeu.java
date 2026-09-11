@@ -103,6 +103,7 @@ public class PanneauJeu extends JPanel {
         drawStartAndGoal(g2);
         drawPlayer(g2);
         drawGrid(g2);
+        drawDirections(g2);
     }
 
     // Dessine les murs du labyrinthe
@@ -121,7 +122,58 @@ public class PanneauJeu extends JPanel {
             }
         }
     }
+    
+    // Dessine les directions des routes lorsque le mode sens unique est activé
+    private void drawDirections(Graphics2D g2) {
 
+        // Si le sens unique est désactivé, aucune flèche n'est affichée
+        if (!moteurJeu.isSensUnique()) {
+         return;
+        }
+
+        boolean[][][] directions = labyrinthe.getDirections();
+
+        g2.setColor(new Color(255, 210, 80));
+        g2.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 18));
+
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COL; col++) {
+
+             // On n'affiche pas de flèche sur un mur
+                if (maze[row][col]) {
+                    continue;
+                }
+                
+            // on ignore les couloirs simples, seulement les intersections
+            if (!estIntersection(row, col)) {
+                continue;
+            }                
+
+                int centreX = col * CELL_SIZE + CELL_SIZE / 2;
+                int centreY = row * CELL_SIZE + CELL_SIZE / 2;
+
+                // 0 = HAUT
+                if (directions[row][col][0]) {
+                    g2.drawString("↑", centreX - 7, centreY + 6);
+                }
+
+                // 1 = BAS
+                if (directions[row][col][1]) {
+                    g2.drawString("↓", centreX - 7, centreY + 6);
+                }
+
+                // 2 = GAUCHE
+                if (directions[row][col][2]) {
+                    g2.drawString("←", centreX - 8, centreY + 6);
+                }
+
+                // 3 = DROITE
+                if (directions[row][col][3]) {
+                    g2.drawString("→", centreX - 5, centreY + 6);
+            }
+        }
+    }
+}
     // Dessine les nœuds explorés , en combinant les couleurs quand plusieurs algorithmes ont exploré la même case (mode comparaison)
     private void drawExploredNodes(Graphics2D g2) {
         Map<Point, List<Color>> couleursParCase = new HashMap<>();
@@ -385,6 +437,20 @@ public class PanneauJeu extends JPanel {
             index[0]++;
         });
         timerRecherche.start();
+    }
+    
+    // Une case est une intersection si elle a 3 passages ouverts ou plus autour d'elle
+    private boolean estIntersection(int row, int col) {
+        int voisinsOuverts = 0;
+        int[] dx = {0, 0, -1, 1};
+        int[] dy = {-1, 1, 0, 0};
+
+        for (int i = 0; i < 4; i++) {
+            if (!labyrinthe.estMur(col + dx[i], row + dy[i])) {
+                voisinsOuverts++;
+            }
+        }
+        return voisinsOuverts >= 3;
     }
 
     // Arrete les animations et reinitialise l'affichage de la recherche 

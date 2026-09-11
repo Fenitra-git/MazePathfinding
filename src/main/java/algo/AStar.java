@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+import modele.Labyrinthe;
 import modele.ResultatRecherche;
 
 /**
@@ -18,7 +19,7 @@ import modele.ResultatRecherche;
  */
 public class AStar {
     // comme Dijkstra, mais trié par distance + heuristique pour explorer moins de cases
-    public static ResultatRecherche calculerChemin(boolean[][] obstacles, Point depart, Point arrivee) {
+    public static ResultatRecherche calculerChemin(boolean[][] obstacles, Point depart, Point arrivee,Labyrinthe labyrinthe,boolean sensUnique) {
         long debut = System.nanoTime();
         int lignes = obstacles.length, colonnes = obstacles[0].length;
 
@@ -47,6 +48,10 @@ public class AStar {
                 int nx = actuel.x + dx[i], ny = actuel.y + dy[i];
                 if (nx < 0 || nx >= colonnes || ny < 0 || ny >= lignes) continue;
                 if (obstacles[ny][nx] || visite[ny][nx]) continue;
+                
+                    if (sensUnique && !labyrinthe.estAccessibleSensUnique(actuel,new Point(nx, ny))) {
+                        continue;
+                    }
 
                 int nouveauCout = distance[actuel.y][actuel.x] + 1;
                 if (nouveauCout < distance[ny][nx]) {

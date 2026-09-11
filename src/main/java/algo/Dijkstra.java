@@ -2,6 +2,7 @@ package algo;
 
 import java.awt.Point;
 import java.util.*;
+import modele.Labyrinthe;
 import modele.ResultatRecherche;
 
 public class Dijkstra {
@@ -15,7 +16,7 @@ public class Dijkstra {
      * @return liste ordonnée des cases à parcourir, du départ à l'arrivée.
      *         Liste vide si aucun chemin n'existe.
      */
-    public static ResultatRecherche calculerChemin(boolean[][] obstacles, Point depart, Point arrivee) {
+    public static ResultatRecherche calculerChemin(boolean[][] obstacles, Point depart, Point arrivee, Labyrinthe labyrinthe, boolean sensUnique) {
         long debut = System.nanoTime();
 
         int lignes = obstacles.length;
@@ -67,7 +68,12 @@ public class Dijkstra {
                 if (visite[ny][nx]) {
                     continue;
                 }
-
+                
+                //respect du sens unique
+                if (sensUnique && !labyrinthe.estAccessibleSensUnique(actuel, new Point(nx, ny))) {
+                    continue;
+                }
+                
                 int nouveauCout = distance[actuel.y][actuel.x] + 1; // coût uniforme = 1
 
                 if (nouveauCout < distance[ny][nx]) {
