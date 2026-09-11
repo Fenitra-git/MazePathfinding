@@ -18,6 +18,9 @@ public class Labyrinthe {
     private static final int LARGEUR = 23;
     private static final int HAUTEUR = 15;
 
+    //Densité de murs à l'intérieur (0.0 = vide, 1.0 = plein)
+    private static final double DENSITE_MURS = 0.28;
+    
     // true = mur, false = passage
     private final boolean[][] grille;
 
@@ -26,6 +29,8 @@ public class Labyrinthe {
 
     // Point d'arrivée
     private final Point sortie;
+    
+    private final Random random = new Random();
 
     // Constructeur
     public Labyrinthe() {
@@ -37,8 +42,13 @@ public class Labyrinthe {
         this.entree = new Point(1, 1);
         // Position de l'arrivée
         this.sortie = new Point(LARGEUR - 2, HAUTEUR - 2);
+        
+        grille[entree.y][entree.x] = false;
+        grille[sortie.y][sortie.x] = false;
+        
+        garantirChemin();
     }
-
+        
     // Vérifie si une case est un mur ou hors de la grille
     public boolean estMur(int x, int y) {
         if (x < 0 || x >= getLargeur() || y < 0 || y >= getHauteur()) {
@@ -50,52 +60,59 @@ public class Labyrinthe {
 
     private boolean[][] genererLabyrinthe() {
         boolean[][] g = new boolean[HAUTEUR][LARGEUR];
-        for (boolean[] ligne : g) {
-            Arrays.fill(ligne, true); // tout est mur au départ
-        }
-
-        Random random = new Random();
-        Deque<Point> pile = new ArrayDeque<>();
-
-        Point depart = new Point(1, 1);
-        g[depart.y][depart.x] = false;
-        pile.push(depart);
-
-        // Déplacements de 2 cases (pour garder un mur entre deux passages)
-        int[] dx = {0, 0, -2, 2};
-        int[] dy = {-2, 2, 0, 0};
-
-        while (!pile.isEmpty()) {
-            Point actuel = pile.peek();
-
-            List<Integer> directions = new ArrayList<>(List.of(0, 1, 2, 3));
-            Collections.shuffle(directions, random);
-
-            boolean aAvance = false;
-
-            for (int dir : directions) {
-                int nx = actuel.x + dx[dir];
-                int ny = actuel.y + dy[dir];
-
-                boolean dansLesLimites = nx > 0 && nx < LARGEUR - 1 && ny > 0 && ny < HAUTEUR - 1;
-
-                if (dansLesLimites && g[ny][nx]) {
-                    // Casse le mur situé entre la case actuelle et la voisine
-                    g[actuel.y + dy[dir] / 2][actuel.x + dx[dir] / 2] = false;
-                    g[ny][nx] = false;
-
-                    pile.push(new Point(nx, ny));
-                    aAvance = true;
-                    break;
+        for (int y = 0; y < HAUTEUR; y++) {
+            for (int x = 0; x < LARGEUR; x++) {
+                if (x == 0 || y == 0 || x == LARGEUR - 1 || y == HAUTEUR - 1) {
+                    g[y][x] = true;                       // murs extérieurs
+                } else {
+                    g[y][x] = random.nextDouble() < DENSITE_MURS; // intérieur aléatoire
                 }
-            }
-            if (!aAvance) {
-                pile.pop(); // aucune voisine disponible, on revient en arrière
             }
         }
         return g;
     }
 
+    private void garantirChemin() {
+        boolean[][] accessible = new boolean[HAUTEUR][LARGEUR];
+        Deque<Point> file = new ArrayDeque<>();
+        int[] dx = {1, -1, 0, 0};
+        int[] dy = {0, 0, 1, -1};
+
+        accessible[entree.y][entree.x] = true;
+        file.add(entree);
+
+        while (!file.isEmpty()) {
+            Point p = file.poll();
+            for (int i = 0; i < 4; i++) {
+                int nx = p.x + dx[i];
+                int ny = p.y + dy[i];
+                if (nx >= 0 && nx < LARGEUR && ny >= 0 && ny < HAUTEUR
+                        && !accessible[ny][nx] && !grille[ny][nx]) {
+                    accessible[ny][nx] = true;
+                    file.add(new Point(nx, ny));
+                }
+            }
+        }
+
+        if (accessible[sortie.y][sortie.x]) return; // OK
+
+        // Creuse depuis la sortie vers l'entrée jusqu'à rejoindre une case accessible
+        int x = sortie.x, y = sortie.y;
+        while (!accessible[y][x]) {
+            grille[y][x] = false;
+            if (x == entree.x) {
+                y += (entree.y > y) ? 1 : -1;
+            } else if (y == entree.y) {
+                x += (entree.x > x) ? 1 : -1;
+            } else if (random.nextBoolean()) {
+                x += (entree.x > x) ? 1 : -1;
+            } else {
+                y += (entree.y > y) ? 1 : -1;
+            }
+        }
+        grille[y][x] = false;
+    }
+    
     // Retourne la grille
     public boolean[][] getObstacles() {
         return grille;
