@@ -23,6 +23,8 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
     private Labyrinthe labyrinthe;
     private Joueur joueur;
     private Etat etat;
+    private boolean sensUnique = false;
+
 
     public MoteurJeu(Labyrinthe labyrinthe) {
         this.labyrinthe = labyrinthe;
@@ -52,7 +54,9 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
                 resultat = AStar.calculerChemin(
                     labyrinthe.getObstacles(),
                     joueur.getPosition(),
-                    labyrinthe.getSortie()
+                    labyrinthe.getSortie(),
+                    labyrinthe,
+                    sensUnique
                 );
                 nomAlgorithme = "A*";
                 break;
@@ -60,7 +64,9 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
                 resultat = RechercheAveugle.calculerChemin(
                     labyrinthe.getObstacles(),
                     joueur.getPosition(),
-                    labyrinthe.getSortie()
+                    labyrinthe.getSortie(),
+                    labyrinthe,
+                    sensUnique
                 );
                 nomAlgorithme = "Recherche aveugle";
                 break;
@@ -68,7 +74,9 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
                 resultat = Dijkstra.calculerChemin(
                     labyrinthe.getObstacles(),
                     joueur.getPosition(),
-                    labyrinthe.getSortie()
+                    labyrinthe.getSortie(),
+                    labyrinthe,
+                    sensUnique
                 );
                 nomAlgorithme = "Dijkstra";
                 break;
@@ -108,4 +116,10 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
     public Labyrinthe getLabyrinthe() {
         return labyrinthe;
     }
+    public boolean isSensUnique(){
+        return sensUnique;
+        }
+    public void setSensUnique(boolean sensUnique) {
+       this.sensUnique = sensUnique; 
+    }    
 }

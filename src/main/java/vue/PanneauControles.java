@@ -126,25 +126,52 @@ public class PanneauControles extends JPanel {
 
         this.add(titreContraintes);
         this.add(javax.swing.Box.createVerticalStrut(12));
-
+        
+        //Bouton pour sense unique
+        JButton boutonSenseUnique = new JButton("➜  Sens unique");
+        
+        boutonSenseUnique.setForeground(Color.white);
+        boutonSenseUnique.setBackground(new Color(25, 38, 58));
+        boutonSenseUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
+        boutonSenseUnique.setFocusPainted(false);
+        boutonSenseUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
+        boutonSenseUnique.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+        boutonSenseUnique.setMaximumSize(new java.awt.Dimension(220, 38));
+        
+        // État du bouton
+        final boolean[] sensUniqueActive = {false};
+        
+        // Quand on clique sur le bouton
+        boutonSenseUnique.addActionListener(e -> {
+            sensUniqueActive[0] = !sensUniqueActive[0];
+            
+            panneauJeu.getMoteurJeu().setSensUnique(sensUniqueActive[0]);
+            panneauJeu.repaint();
+            
+            if (sensUniqueActive[0]) {
+                boutonSenseUnique.setText("➜  Sens unique : ON");
+                boutonSenseUnique.setForeground(new Color(60, 190, 100));
+                boutonSenseUnique.setBorder(
+                        BorderFactory.createLineBorder(new Color(60, 190, 100), 2)
+                );
+            }else {
+               boutonSenseUnique.setText("➜  Sens unique : OFF");
+               boutonSenseUnique.setForeground(Color.WHITE);
+               boutonSenseUnique.setBorder(
+                       BorderFactory.createLineBorder(couleurBordure, 1)
+               );
+            }
+        });
+        
         // Informations sur les contraintes utilisées dans le parcours
-        JLabel sensUnique = new JLabel("➜  Sens unique");
         JLabel obstacles = new JLabel("■  Obstacles");
-
-        sensUnique.setForeground(Color.WHITE);
         obstacles.setForeground(Color.WHITE);
-
-        sensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
         obstacles.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
-
-        sensUnique.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
         obstacles.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
-
-        this.add(sensUnique);
+        
+        this.add(boutonSenseUnique);
         this.add(javax.swing.Box.createVerticalStrut(8));
         this.add(obstacles);
-
-        this.add(javax.swing.Box.createVerticalStrut(30));
 
         // Titre de la section contrôles
         JLabel titreControles = new JLabel("CONTRÔLES");
