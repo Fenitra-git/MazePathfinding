@@ -24,7 +24,7 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
     private Joueur joueur;
     private Etat etat;
     private boolean sensUnique = false;
-
+    private boolean modeEditionSensUnique = false;
 
     public MoteurJeu(Labyrinthe labyrinthe) {
         this.labyrinthe = labyrinthe;
@@ -98,11 +98,18 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
         etat = Etat.EN_COURS;
     }
 
-    // Génère un TOUT NOUVEAU labyrinthe aléatoire, avec un joueur frais dessus
     public void nouveauLabyrinthe() {
         this.labyrinthe = new Labyrinthe();
         this.joueur = new Joueur(labyrinthe);
         this.etat = Etat.EN_COURS;
+    }
+    
+    public boolean toggleSensUnique(int xA, int yA, int xB, int yB) {
+        return labyrinthe.toggleSensUnique(xA, yA, xB, yB);
+    }
+    
+    public void effacerSensUniques() {
+        labyrinthe.effacerSensUniques();
     }
 
     public Etat getEtat() {
@@ -116,10 +123,20 @@ public class MoteurJeu { // Reçoit les déplacements du joueur et met à jour l
     public Labyrinthe getLabyrinthe() {
         return labyrinthe;
     }
+    
     public boolean isSensUnique(){
         return sensUnique;
         }
+    
     public void setSensUnique(boolean sensUnique) {
        this.sensUnique = sensUnique; 
-    }    
+    }   
+    
+    public boolean isModeEditionSensUnique() { 
+        return modeEditionSensUnique; 
+    }
+    
+    public void setModeEditionSensUnique(boolean mode) { 
+        this.modeEditionSensUnique = mode; 
+    }
 }

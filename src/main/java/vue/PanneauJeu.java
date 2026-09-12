@@ -60,6 +60,7 @@ public class PanneauJeu extends JPanel {
     private Timer timerRecherche;
     // Timer utilisé pour le déplacement du joueur sur le chemin
     private Timer timerChemin;
+    private java.awt.Point caseSelectionnee = null;
 
     public PanneauJeu(MoteurJeu moteurJeu) {
         this.moteurJeu = moteurJeu;
@@ -71,6 +72,12 @@ public class PanneauJeu extends JPanel {
 
         this.setPreferredSize(new java.awt.Dimension(width, height));
         this.setBackground(COULEUR_FOND);
+        this.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                gererClicSouris(e);
+            }
+        });
     }
 
     // Recopie les données du labyrinthe actuel du moteur de jeu dans le panneau
@@ -88,6 +95,7 @@ public class PanneauJeu extends JPanel {
         chargerDepuisLabyrinthe();
         exploredNodesParAlgo.clear();
         cheminParAlgo.clear();
+        caseSelectionnee = null;
         repaint();
     }
 
@@ -104,6 +112,7 @@ public class PanneauJeu extends JPanel {
         drawPlayer(g2);
         drawGrid(g2);
         drawDirections(g2);
+        drawSelection(g2); 
     }
 
     // Dessine les murs du labyrinthe
@@ -125,56 +134,33 @@ public class PanneauJeu extends JPanel {
     
     // Dessine les directions des routes lorsque le mode sens unique est activé
     private void drawDirections(Graphics2D g2) {
-
+        boolean[][][] directions  = labyrinthe.getDirections();
+        boolean[][][] sensUniques = labyrinthe.getSensUniquePose();
+        
         // Si le sens unique est désactivé, aucune flèche n'est affichée
-        if (!moteurJeu.isSensUnique()) {
+        if (!moteurJeu.isModeEditionSensUnique() && !moteurJeu.isSensUnique()) {
          return;
         }
-
-        boolean[][][] directions = labyrinthe.getDirections();
 
         g2.setColor(new Color(255, 210, 80));
         g2.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 18));
 
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COL; col++) {
-
-             // On n'affiche pas de flèche sur un mur
-                if (maze[row][col]) {
-                    continue;
-                }
-                
-            // on ignore les couloirs simples, seulement les intersections
-            if (!estIntersection(row, col)) {
-                continue;
-            }                
+                if (maze[row][col]) continue;
 
                 int centreX = col * CELL_SIZE + CELL_SIZE / 2;
                 int centreY = row * CELL_SIZE + CELL_SIZE / 2;
 
-                // 0 = HAUT
-                if (directions[row][col][0]) {
-                    g2.drawString("↑", centreX - 7, centreY + 6);
-                }
-
-                // 1 = BAS
-                if (directions[row][col][1]) {
-                    g2.drawString("↓", centreX - 7, centreY + 6);
-                }
-
-                // 2 = GAUCHE
-                if (directions[row][col][2]) {
-                    g2.drawString("←", centreX - 8, centreY + 6);
-                }
-
-                // 3 = DROITE
-                if (directions[row][col][3]) {
-                    g2.drawString("→", centreX - 5, centreY + 6);
+                // On affiche uniquement les directions marquées comme "sens unique posé"
+                if (sensUniques[row][col][0]) g2.drawString("↑", centreX - 7, centreY + 6);
+                if (sensUniques[row][col][1]) g2.drawString("↓", centreX - 7, centreY + 6);
+                if (sensUniques[row][col][2]) g2.drawString("←", centreX - 8, centreY + 6);
+                if (sensUniques[row][col][3]) g2.drawString("→", centreX - 5, centreY + 6);
             }
         }
     }
-}
-    // Dessine les nœuds explorés , en combinant les couleurs quand plusieurs algorithmes ont exploré la même case (mode comparaison)
+
     private void drawExploredNodes(Graphics2D g2) {
         Map<Point, List<Color>> couleursParCase = new HashMap<>();
  
@@ -298,6 +284,20 @@ public class PanneauJeu extends JPanel {
             int y = row * CELL_SIZE;
             g2.drawLine(0, y, COL * CELL_SIZE, y);
         }
+    }
+    
+    private void drawSelection(Graphics2D g2) {
+        if (caseSelectionnee == null) return;
+
+        int x = caseSelectionnee.x * CELL_SIZE;
+        int y = caseSelectionnee.y * CELL_SIZE;
+
+        g2.setColor(new Color(255, 230, 80, 90));
+        g2.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+        g2.setColor(new Color(255, 230, 80));
+        g2.setStroke(new java.awt.BasicStroke(2f));
+        g2.drawRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+        g2.setStroke(new java.awt.BasicStroke(1f));
     }
 
     // Anime le déplacement du joueur sur le chemin final
@@ -451,6 +451,44 @@ public class PanneauJeu extends JPanel {
             }
         }
         return voisinsOuverts >= 3;
+    }
+    
+    private void gererClicSouris(java.awt.event.MouseEvent e) {
+        if (!moteurJeu.isModeEditionSensUnique()) return;
+
+        int col = e.getX() / CELL_SIZE;
+        int row = e.getY() / CELL_SIZE;
+
+        if (row < 0 || row >= ROWS || col < 0 || col >= COL) return;
+        if (maze[row][col]) return; // clic sur un mur → ignore
+
+        java.awt.Point nouvelle = new java.awt.Point(col, row);
+
+        if (caseSelectionnee == null) {
+            // Aucune sélection → on mémorise
+            caseSelectionnee = nouvelle;
+        } else if (caseSelectionnee.equals(nouvelle)) {
+            // Re-clic sur la même case → on désélectionne
+            caseSelectionnee = null;
+        } else {
+            // Deuxième clic : tester l'adjacence
+            int dx = Math.abs(nouvelle.x - caseSelectionnee.x);
+            int dy = Math.abs(nouvelle.y - caseSelectionnee.y);
+
+            if ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) {
+                // Adjacent → bascule le sens unique
+                moteurJeu.toggleSensUnique(
+                    caseSelectionnee.x, caseSelectionnee.y,
+                    nouvelle.x, nouvelle.y
+                );
+                caseSelectionnee = null; // on efface la sélection après l'action
+            } else {
+                // Non adjacent → on déplace la sélection
+                caseSelectionnee = nouvelle;
+            }
+        }
+
+        repaint();
     }
 
     // Arrete les animations et reinitialise l'affichage de la recherche 
