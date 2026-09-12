@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import modele.Labyrinthe;
 import modele.ResultatRecherche;
 
 /**
@@ -17,7 +18,7 @@ import modele.ResultatRecherche;
  */
 public class RechercheAveugle {
     // parcours en largeur : chaque pas coûte 1, donc le premier chemin trouvé est le plus court
-    public static ResultatRecherche calculerChemin(boolean[][] obstacles, Point depart, Point arrivee) {
+    public static ResultatRecherche calculerChemin(boolean[][] obstacles, Point depart, Point arrivee, Labyrinthe labyrinthe, boolean sensUnique) {
         long debut = System.nanoTime();
         int lignes = obstacles.length, colonnes = obstacles[0].length;
 
@@ -40,7 +41,12 @@ public class RechercheAveugle {
                 int nx = actuel.x + dx[i], ny = actuel.y + dy[i];
                 if (nx < 0 || nx >= colonnes || ny < 0 || ny >= lignes) continue;
                 if (obstacles[ny][nx] || visite[ny][nx]) continue;
-
+                
+                //respect de sens unique
+                if (sensUnique && !labyrinthe.estAccessibleSensUnique(actuel, new Point(nx, ny))) {
+                    continue;
+                }
+                
                 visite[ny][nx] = true;
                 precedent[ny][nx] = actuel;
                 file.add(new Point(nx, ny));

@@ -16,7 +16,9 @@ public class DatabaseManager {
     private static final String DB_HOST = "localhost";
     private static final String DB_PORT = "5432";
     private static final String DB_NAME = "mazepathfinding";
-    private static final Dotenv dotenv = Dotenv.load();
+    private static final Dotenv dotenv = Dotenv.configure()
+            .ignoreIfMissing()
+            .load();
     private static final String DB_USER = dotenv.get("DB_USER");
     private static final String DB_PASSWORD = dotenv.get("DB_PASSWORD");
 

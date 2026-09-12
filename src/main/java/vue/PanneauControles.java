@@ -127,26 +127,99 @@ public class PanneauControles extends JPanel {
         this.add(titreContraintes);
         this.add(javax.swing.Box.createVerticalStrut(12));
 
-        // Informations sur les contraintes utilisées dans le parcours
-        JLabel sensUnique = new JLabel("➜  Sens unique");
+        // ---- Bouton 1 : mode édition (poser/retirer des sens uniques à la souris) ----
+        JButton boutonEditerSensUnique = new JButton("✎  Éditer les sens uniques");
+        boutonEditerSensUnique.setForeground(Color.WHITE);
+        boutonEditerSensUnique.setBackground(new Color(25, 38, 58));
+        boutonEditerSensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
+        boutonEditerSensUnique.setFocusPainted(false);
+        boutonEditerSensUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
+        boutonEditerSensUnique.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+        boutonEditerSensUnique.setMaximumSize(new java.awt.Dimension(220, 38));
+
+        final boolean[] editionActive = {false};
+        boutonEditerSensUnique.addActionListener(e -> {
+            editionActive[0] = !editionActive[0];
+            panneauJeu.getMoteurJeu().setModeEditionSensUnique(editionActive[0]);
+            panneauJeu.repaint();
+
+            if (editionActive[0]) {
+                boutonEditerSensUnique.setText("✎  Édition : ON");
+                boutonEditerSensUnique.setForeground(new Color(60, 190, 100));
+                boutonEditerSensUnique.setBorder(
+                        BorderFactory.createLineBorder(new Color(60, 190, 100), 2)
+                );
+            } else {
+                boutonEditerSensUnique.setText("✎  Éditer les sens uniques");
+                boutonEditerSensUnique.setForeground(Color.WHITE);
+                boutonEditerSensUnique.setBorder(
+                        BorderFactory.createLineBorder(couleurBordure, 1)
+                );
+            }
+        });
+
+        this.add(boutonEditerSensUnique);
+        this.add(javax.swing.Box.createVerticalStrut(8));
+
+        // ---- Bouton 2 : appliquer aux algos ----
+        JButton boutonAppliquerSensUnique = new JButton("➜  Appliquer aux algos : OFF");
+        boutonAppliquerSensUnique.setForeground(Color.WHITE);
+        boutonAppliquerSensUnique.setBackground(new Color(25, 38, 58));
+        boutonAppliquerSensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
+        boutonAppliquerSensUnique.setFocusPainted(false);
+        boutonAppliquerSensUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
+        boutonAppliquerSensUnique.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+        boutonAppliquerSensUnique.setMaximumSize(new java.awt.Dimension(220, 38));
+
+        final boolean[] appliqueActive = {false};
+        boutonAppliquerSensUnique.addActionListener(e -> {
+            appliqueActive[0] = !appliqueActive[0];
+            panneauJeu.getMoteurJeu().setSensUnique(appliqueActive[0]);
+            panneauJeu.repaint();
+
+            if (appliqueActive[0]) {
+                boutonAppliquerSensUnique.setText("➜  Appliquer aux algos : ON");
+                boutonAppliquerSensUnique.setForeground(new Color(60, 190, 100));
+                boutonAppliquerSensUnique.setBorder(
+                        BorderFactory.createLineBorder(new Color(60, 190, 100), 2)
+                );
+            } else {
+                boutonAppliquerSensUnique.setText("➜  Appliquer aux algos : OFF");
+                boutonAppliquerSensUnique.setForeground(Color.WHITE);
+                boutonAppliquerSensUnique.setBorder(
+                        BorderFactory.createLineBorder(couleurBordure, 1)
+                );
+            }
+        });
+
+        this.add(boutonAppliquerSensUnique);
+        this.add(javax.swing.Box.createVerticalStrut(8));
+
+        // ---- Bouton 3 : effacer tous les sens uniques ----
+        JButton boutonEffacerSensUnique = new JButton("⌫  Effacer les sens uniques");
+        boutonEffacerSensUnique.setForeground(Color.WHITE);
+        boutonEffacerSensUnique.setBackground(new Color(25, 38, 58));
+        boutonEffacerSensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
+        boutonEffacerSensUnique.setFocusPainted(false);
+        boutonEffacerSensUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
+        boutonEffacerSensUnique.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+        boutonEffacerSensUnique.setMaximumSize(new java.awt.Dimension(220, 38));
+        boutonEffacerSensUnique.addActionListener(e -> {
+            panneauJeu.getMoteurJeu().effacerSensUniques();
+            panneauJeu.repaint();
+        });
+
+        this.add(boutonEffacerSensUnique);
+        this.add(javax.swing.Box.createVerticalStrut(8));
+
+        // ---- Label existant ----
         JLabel obstacles = new JLabel("■  Obstacles");
-
-        sensUnique.setForeground(Color.WHITE);
         obstacles.setForeground(Color.WHITE);
-
-        sensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
         obstacles.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
-
-        sensUnique.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
         obstacles.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
-        this.add(sensUnique);
-        this.add(javax.swing.Box.createVerticalStrut(8));
         this.add(obstacles);
-
-        this.add(javax.swing.Box.createVerticalStrut(30));
-
-        // Titre de la section contrôles
+        
         JLabel titreControles = new JLabel("CONTRÔLES");
         titreControles.setForeground(new Color(150, 170, 200));
         titreControles.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 13));
@@ -205,7 +278,7 @@ public class PanneauControles extends JPanel {
             boutonLancerSimultane.setEnabled(true);
         });
 
-        javax.swing.JButton boutonNouveauLabyrinthe = new javax.swing.JButton("⊞ Nouveau");
+        javax.swing.JButton boutonNouveauLabyrinthe = new javax.swing.JButton("⊞ Nouveau Labyrinthe");
         boutonNouveauLabyrinthe.addActionListener(e -> {
             // Arrêter et nettoyer l'ancienne recherche
             panneauJeu.getMoteurJeu().reinitialiser();
