@@ -20,6 +20,9 @@ public class PanneauControles extends JPanel {
     private JButton boutonBFS;
     private JButton boutonLancer;
     private JButton boutonLancerSimultane;
+    private JButton boutonEditerSensUnique;
+    private JButton boutonAppliquerSensUnique;
+    private JButton boutonEffacerSensUnique;
     private MoteurJeu.Algorithme algorithmeSelectionne = MoteurJeu.Algorithme.DIJKSTRA;
 
     public PanneauControles(PanneauJeu panneauJeu, FenetreJeu fenetre) {
@@ -127,8 +130,8 @@ public class PanneauControles extends JPanel {
         this.add(titreContraintes);
         this.add(javax.swing.Box.createVerticalStrut(12));
 
-        // ---- Bouton 1 : mode édition (poser/retirer des sens uniques à la souris) ----
-        JButton boutonEditerSensUnique = new JButton("✎  Éditer les sens uniques");
+        // Bouton 1 : mode édition (poser/retirer des sens uniques à la souris) 
+        boutonEditerSensUnique = new JButton("✎  Éditer les sens uniques");
         boutonEditerSensUnique.setForeground(Color.WHITE);
         boutonEditerSensUnique.setBackground(new Color(25, 38, 58));
         boutonEditerSensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
@@ -146,23 +149,19 @@ public class PanneauControles extends JPanel {
             if (editionActive[0]) {
                 boutonEditerSensUnique.setText("✎  Édition : ON");
                 boutonEditerSensUnique.setForeground(new Color(60, 190, 100));
-                boutonEditerSensUnique.setBorder(
-                        BorderFactory.createLineBorder(new Color(60, 190, 100), 2)
-                );
+                boutonEditerSensUnique.setBorder(BorderFactory.createLineBorder(new Color(60, 190, 100), 2));
             } else {
                 boutonEditerSensUnique.setText("✎  Éditer les sens uniques");
                 boutonEditerSensUnique.setForeground(Color.WHITE);
-                boutonEditerSensUnique.setBorder(
-                        BorderFactory.createLineBorder(couleurBordure, 1)
-                );
+                boutonEditerSensUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
             }
         });
 
         this.add(boutonEditerSensUnique);
         this.add(javax.swing.Box.createVerticalStrut(8));
 
-        // ---- Bouton 2 : appliquer aux algos ----
-        JButton boutonAppliquerSensUnique = new JButton("➜  Appliquer aux algos : OFF");
+        // Bouton 2 : appliquer aux algos 
+        boutonAppliquerSensUnique = new JButton("➜  Appliquer aux algos : OFF");
         boutonAppliquerSensUnique.setForeground(Color.WHITE);
         boutonAppliquerSensUnique.setBackground(new Color(25, 38, 58));
         boutonAppliquerSensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
@@ -180,23 +179,19 @@ public class PanneauControles extends JPanel {
             if (appliqueActive[0]) {
                 boutonAppliquerSensUnique.setText("➜  Appliquer aux algos : ON");
                 boutonAppliquerSensUnique.setForeground(new Color(60, 190, 100));
-                boutonAppliquerSensUnique.setBorder(
-                        BorderFactory.createLineBorder(new Color(60, 190, 100), 2)
-                );
+                boutonAppliquerSensUnique.setBorder(BorderFactory.createLineBorder(new Color(60, 190, 100), 2));
             } else {
                 boutonAppliquerSensUnique.setText("➜  Appliquer aux algos : OFF");
                 boutonAppliquerSensUnique.setForeground(Color.WHITE);
-                boutonAppliquerSensUnique.setBorder(
-                        BorderFactory.createLineBorder(couleurBordure, 1)
-                );
+                boutonAppliquerSensUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
             }
         });
 
         this.add(boutonAppliquerSensUnique);
         this.add(javax.swing.Box.createVerticalStrut(8));
 
-        // ---- Bouton 3 : effacer tous les sens uniques ----
-        JButton boutonEffacerSensUnique = new JButton("⌫  Effacer les sens uniques");
+        // Bouton 3 : effacer tous les sens uniques 
+        boutonEffacerSensUnique = new JButton("⌫  Effacer les sens uniques");
         boutonEffacerSensUnique.setForeground(Color.WHITE);
         boutonEffacerSensUnique.setBackground(new Color(25, 38, 58));
         boutonEffacerSensUnique.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
@@ -210,16 +205,9 @@ public class PanneauControles extends JPanel {
         });
 
         this.add(boutonEffacerSensUnique);
-        this.add(javax.swing.Box.createVerticalStrut(8));
+        // Espacement avant Contrôles
+        this.add(javax.swing.Box.createVerticalStrut(30));
 
-        // ---- Label existant ----
-        JLabel obstacles = new JLabel("■  Obstacles");
-        obstacles.setForeground(Color.WHITE);
-        obstacles.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 13));
-        obstacles.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
-
-        this.add(obstacles);
-        
         JLabel titreControles = new JLabel("CONTRÔLES");
         titreControles.setForeground(new Color(150, 170, 200));
         titreControles.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 13));
@@ -234,6 +222,18 @@ public class PanneauControles extends JPanel {
             // Empêche de lancer plusieurs recherches en même temps
             boutonLancer.setEnabled(false);
             boutonLancerSimultane.setEnabled(false);
+            // Désactiver le mode édition des sens uniques
+            editionActive[0] = false;
+            panneauJeu.getMoteurJeu().setModeEditionSensUnique(false);
+
+            boutonEditerSensUnique.setText("✎  Éditer les sens uniques");
+            boutonEditerSensUnique.setForeground(Color.WHITE);
+            boutonEditerSensUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
+            
+            boutonEditerSensUnique.setEnabled(false);
+            boutonAppliquerSensUnique.setEnabled(false);
+            boutonEffacerSensUnique.setEnabled(false);
+
             MoteurJeu moteurJeu = panneauJeu.getMoteurJeu();
             // Chaque nouvelle recherche repart du début
             moteurJeu.reinitialiser();
@@ -243,29 +243,49 @@ public class PanneauControles extends JPanel {
             fenetre.getPanneauResultats().reinitialiserResultats();
             fenetre.getPanneauResultats().setAlgorithmeActuel(algorithmeSelectionne);
             ResultatRecherche resultat = moteurJeu.obtenirIndice(algorithmeSelectionne);
+
             panneauJeu.animerRecherche(algorithmeSelectionne, resultat.getOrdreExploration(),
-                resultat.getChemin(), resultat, fenetre, () -> {
-                    boutonLancer.setEnabled(true);
-                    boutonLancerSimultane.setEnabled(true);
-                });
+                    resultat.getChemin(), resultat, fenetre, () -> {
+                boutonLancer.setEnabled(true);
+                boutonLancerSimultane.setEnabled(true);
+
+                boutonEditerSensUnique.setEnabled(true);
+                boutonAppliquerSensUnique.setEnabled(true);
+                boutonEffacerSensUnique.setEnabled(true);
+            });
         });
 
         // Lance les 3 algorithmes en même temps, peu importe la sélection ci-dessus
         boutonLancerSimultane = new javax.swing.JButton("▶▶  Lancer les 3 algorithmes");
-            boutonLancerSimultane.addActionListener(e -> {
-                boutonLancer.setEnabled(false);
-                boutonLancerSimultane.setEnabled(false);
-    
-                MoteurJeu moteurJeu = panneauJeu.getMoteurJeu();
-                moteurJeu.reinitialiser();
-                panneauJeu.reinitialiserRecherche();
-                fenetre.getPanneauResultats().reinitialiserResultats();
-    
-                Map<MoteurJeu.Algorithme, ResultatRecherche> resultats = moteurJeu.comparerAlgorithmes();
-                panneauJeu.animerComparaison(resultats, fenetre, () -> {
-                    boutonLancer.setEnabled(true);
-                    boutonLancerSimultane.setEnabled(true);
-                });
+        boutonLancerSimultane.addActionListener(e -> {
+            boutonLancer.setEnabled(false);
+            boutonLancerSimultane.setEnabled(false);
+            // Désactiver le mode édition des sens uniques
+            editionActive[0] = false;
+            panneauJeu.getMoteurJeu().setModeEditionSensUnique(false);
+
+            boutonEditerSensUnique.setText("✎  Éditer les sens uniques");
+            boutonEditerSensUnique.setForeground(Color.WHITE);
+            boutonEditerSensUnique.setBorder(BorderFactory.createLineBorder(couleurBordure, 1));
+            
+            boutonEditerSensUnique.setEnabled(false);
+            boutonAppliquerSensUnique.setEnabled(false);
+            boutonEffacerSensUnique.setEnabled(false);
+
+            MoteurJeu moteurJeu = panneauJeu.getMoteurJeu();
+            moteurJeu.reinitialiser();
+            panneauJeu.reinitialiserRecherche();
+            fenetre.getPanneauResultats().reinitialiserResultats();
+
+            Map<MoteurJeu.Algorithme, ResultatRecherche> resultats = moteurJeu.comparerAlgorithmes();
+            panneauJeu.animerComparaison(resultats, fenetre, () -> {
+                boutonLancer.setEnabled(true);
+                boutonLancerSimultane.setEnabled(true);
+
+                boutonEditerSensUnique.setEnabled(true);
+                boutonAppliquerSensUnique.setEnabled(true);
+                boutonEffacerSensUnique.setEnabled(true);
+            });
         });
 
         javax.swing.JButton boutonReinitialiser = new javax.swing.JButton("↻ Réinitialiser");
@@ -276,6 +296,9 @@ public class PanneauControles extends JPanel {
             // Réactive Lancer même si l'animation a été interrompue
             boutonLancer.setEnabled(true);
             boutonLancerSimultane.setEnabled(true);
+            boutonEditerSensUnique.setEnabled(true);
+            boutonAppliquerSensUnique.setEnabled(true);
+            boutonEffacerSensUnique.setEnabled(true);
         });
 
         javax.swing.JButton boutonNouveauLabyrinthe = new javax.swing.JButton("⊞ Nouveau Labyrinthe");
@@ -290,11 +313,14 @@ public class PanneauControles extends JPanel {
             // Réactiver Lancer
             boutonLancer.setEnabled(true);
             boutonLancerSimultane.setEnabled(true);
+            boutonEditerSensUnique.setEnabled(true);
+            boutonAppliquerSensUnique.setEnabled(true);
+            boutonEffacerSensUnique.setEnabled(true);
         });
 
         boutonLancer.setBackground(new Color(30, 110, 210));
         boutonLancer.setForeground(Color.WHITE);
-        
+
         boutonLancerSimultane.setBackground(new Color(30, 110, 210));
         boutonLancerSimultane.setForeground(Color.WHITE);
 

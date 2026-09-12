@@ -31,14 +31,24 @@ public class PanneauJeu extends JPanel {
     private final Color COULEUR_MUR = new Color(9, 15, 25);
     private final Color COULEUR_PASSAGE = new Color(20, 30, 46);
     private final Color COULEUR_BORDURE = new Color(36, 52, 74);
-    private final Color COULEUR_CHEMIN = new Color(91, 70, 22);
+    private final Color COULEUR_CHEMIN = new Color(140, 95, 40);
 
     // Couleur utilisée pour les noeuds explorés
     private static final Map<MoteurJeu.Algorithme, Color> COULEURS_EXPLORATION = new EnumMap<>(MoteurJeu.Algorithme.class);
+
     static {
         COULEURS_EXPLORATION.put(MoteurJeu.Algorithme.DIJKSTRA, new Color(18, 105, 120));
         COULEURS_EXPLORATION.put(MoteurJeu.Algorithme.A_STAR, new Color(85, 60, 145));
         COULEURS_EXPLORATION.put(MoteurJeu.Algorithme.RECHERCHE_AVEUGLE, new Color(145, 80, 30));
+    }
+
+    // Couleur utilisée pour les chemins finals
+    private static final Map<MoteurJeu.Algorithme, Color> COULEURS_CHEMIN_FINAL = new EnumMap<>(MoteurJeu.Algorithme.class);
+
+    static {
+        COULEURS_CHEMIN_FINAL.put(MoteurJeu.Algorithme.DIJKSTRA, new Color(0, 210, 235));
+        COULEURS_CHEMIN_FINAL.put(MoteurJeu.Algorithme.A_STAR, new Color(155, 75, 235));
+        COULEURS_CHEMIN_FINAL.put(MoteurJeu.Algorithme.RECHERCHE_AVEUGLE, new Color(255, 145, 60));
     }
 
     private MoteurJeu moteurJeu;
@@ -55,7 +65,7 @@ public class PanneauJeu extends JPanel {
     // Cases explorées et chemin final, séparés par algorithme
     private Map<MoteurJeu.Algorithme, List<Point>> exploredNodesParAlgo = new EnumMap<>(MoteurJeu.Algorithme.class);
     private Map<MoteurJeu.Algorithme, List<Point>> cheminParAlgo = new EnumMap<>(MoteurJeu.Algorithme.class);
-    
+
     // Timer utilisé pour l'animation des noeuds explorés
     private Timer timerRecherche;
     // Timer utilisé pour le déplacement du joueur sur le chemin
@@ -112,7 +122,7 @@ public class PanneauJeu extends JPanel {
         drawPlayer(g2);
         drawGrid(g2);
         drawDirections(g2);
-        drawSelection(g2); 
+        drawSelection(g2);
     }
 
     // Dessine les murs du labyrinthe
@@ -131,15 +141,15 @@ public class PanneauJeu extends JPanel {
             }
         }
     }
-    
+
     // Dessine les directions des routes lorsque le mode sens unique est activé
     private void drawDirections(Graphics2D g2) {
-        boolean[][][] directions  = labyrinthe.getDirections();
+        boolean[][][] directions = labyrinthe.getDirections();
         boolean[][][] sensUniques = labyrinthe.getSensUniquePose();
-        
+
         // Si le sens unique est désactivé, aucune flèche n'est affichée
         if (!moteurJeu.isModeEditionSensUnique() && !moteurJeu.isSensUnique()) {
-         return;
+            return;
         }
 
         g2.setColor(new Color(255, 210, 80));
@@ -147,23 +157,33 @@ public class PanneauJeu extends JPanel {
 
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COL; col++) {
-                if (maze[row][col]) continue;
+                if (maze[row][col]) {
+                    continue;
+                }
 
                 int centreX = col * CELL_SIZE + CELL_SIZE / 2;
                 int centreY = row * CELL_SIZE + CELL_SIZE / 2;
 
                 // On affiche uniquement les directions marquées comme "sens unique posé"
-                if (sensUniques[row][col][0]) g2.drawString("↑", centreX - 7, centreY + 6);
-                if (sensUniques[row][col][1]) g2.drawString("↓", centreX - 7, centreY + 6);
-                if (sensUniques[row][col][2]) g2.drawString("←", centreX - 8, centreY + 6);
-                if (sensUniques[row][col][3]) g2.drawString("→", centreX - 5, centreY + 6);
+                if (sensUniques[row][col][0]) {
+                    g2.drawString("↑", centreX - 7, centreY + 6);
+                }
+                if (sensUniques[row][col][1]) {
+                    g2.drawString("↓", centreX - 7, centreY + 6);
+                }
+                if (sensUniques[row][col][2]) {
+                    g2.drawString("←", centreX - 8, centreY + 6);
+                }
+                if (sensUniques[row][col][3]) {
+                    g2.drawString("→", centreX - 5, centreY + 6);
+                }
             }
         }
     }
 
     private void drawExploredNodes(Graphics2D g2) {
         Map<Point, List<Color>> couleursParCase = new HashMap<>();
- 
+
         // L'ordre d'insertion (EnumMap = ordre naturel de l'enum) garantit un rendu stable, toujours dans le même ordre Dijkstra / A* / BFS
         for (Map.Entry<MoteurJeu.Algorithme, List<Point>> entry : exploredNodesParAlgo.entrySet()) {
             Color couleur = COULEURS_EXPLORATION.get(entry.getKey());
@@ -171,7 +191,7 @@ public class PanneauJeu extends JPanel {
                 couleursParCase.computeIfAbsent(p, k -> new ArrayList<>()).add(couleur);
             }
         }
- 
+
         for (Map.Entry<Point, List<Color>> entry : couleursParCase.entrySet()) {
             dessinerCaseMulticolore(g2, entry.getKey(), entry.getValue());
         }
@@ -183,11 +203,11 @@ public class PanneauJeu extends JPanel {
         int taille = CELL_SIZE - 14;
         int x = p.x * CELL_SIZE + marge;
         int y = p.y * CELL_SIZE + marge;
- 
+
         if (couleurs.size() == 1) {
             g2.setColor(couleurs.get(0));
             g2.fillRect(x, y, taille, taille);
- 
+
         } else if (couleurs.size() == 2) {
             // Diagonale : triangle haut-gauche pour la 1ère couleur, bas-droit pour la 2e
             g2.setColor(couleurs.get(0));
@@ -202,7 +222,7 @@ public class PanneauJeu extends JPanel {
                     new int[]{y, y + taille, y + taille},
                     3
             );
- 
+
         } else {
             // 3 algorithmes : bandes verticales égales
             int largeurBande = taille / couleurs.size();
@@ -215,18 +235,91 @@ public class PanneauJeu extends JPanel {
 
     // Dessine le chemin final
     private void drawPath(Graphics2D g2) {
-        g2.setColor(COULEUR_CHEMIN);
+        // Si on lance un seul algorithme, on garde l'ancien affichage marron
+        if (cheminParAlgo.size() <= 1) {
+            g2.setColor(COULEUR_CHEMIN);
 
-        Set<Point> casesChemin = new HashSet<>();
-        for (List<Point> chemin : cheminParAlgo.values()) {
-            casesChemin.addAll(chemin);
+            for (List<Point> chemin : cheminParAlgo.values()) {
+                for (Point p : chemin) {
+                    int x = p.x * CELL_SIZE;
+                    int y = p.y * CELL_SIZE;
+
+                    g2.fillRect(x + 5, y + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+                }
+            }
+
+            return;
+        }
+        // En mode comparaison, on regarde quels algorithmes passent par chaque case
+        Map<Point, List<MoteurJeu.Algorithme>> algorithmesParCase = new HashMap<>();
+        for (Map.Entry<MoteurJeu.Algorithme, List<Point>> entry : cheminParAlgo.entrySet()) {
+            MoteurJeu.Algorithme algo = entry.getKey();
+
+            for (Point p : entry.getValue()) {
+                if (!algorithmesParCase.containsKey(p)) {
+                    algorithmesParCase.put(p, new ArrayList<>());
+                }
+
+                algorithmesParCase.get(p).add(algo);
+            }
         }
 
-        for (Point p : casesChemin) {
-            int x = p.x * CELL_SIZE;
-            int y = p.y * CELL_SIZE;
-            g2.fillRect(x + 5, y + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+        // Dessin de chaque case du chemin
+        for (Map.Entry<Point, List<MoteurJeu.Algorithme>> entry : algorithmesParCase.entrySet()) {
+            dessinerCaseCheminComparaison(g2, entry.getKey(), entry.getValue());
         }
+    }
+
+    private void dessinerCaseCheminComparaison(Graphics2D g2,Point p,List<MoteurJeu.Algorithme> algorithmes) {
+        int x = p.x * CELL_SIZE;
+        int y = p.y * CELL_SIZE;
+        int marge = 4;
+        int taille = CELL_SIZE - 8;
+
+        // Bordure plus épaisse pour bien voir le chemin final
+        g2.setStroke(new java.awt.BasicStroke(3f));
+
+        // 1 ALGORITHME
+        if (algorithmes.size() == 1) {
+            MoteurJeu.Algorithme algo = algorithmes.get(0);
+            g2.setColor(COULEURS_CHEMIN_FINAL.get(algo));
+            g2.drawRect(x + marge, y + marge, taille, taille);
+        } // 2 ALGORITHMES
+        else if (algorithmes.size() == 2) {
+            Color couleur1 = COULEURS_CHEMIN_FINAL.get(algorithmes.get(0));
+            Color couleur2 = COULEURS_CHEMIN_FINAL.get(algorithmes.get(1));
+
+            int milieu = x + marge + taille / 2;
+
+            // Première couleur : moitié gauche de la bordure
+            g2.setColor(couleur1);
+
+            // Côté gauche
+            g2.drawLine(x + marge, y + marge, x + marge, y + marge + taille);
+
+            // Moitié gauche en haut
+            g2.drawLine(x + marge, y + marge, milieu, y + marge);
+
+            // Moitié gauche en bas
+            g2.drawLine(x + marge, y + marge + taille, milieu, y + marge + taille);
+
+            // Deuxième couleur : moitié droite de la bordure
+            g2.setColor(couleur2);
+
+            // Côté droit
+            g2.drawLine(x + marge + taille, y + marge, x + marge + taille, y + marge + taille);
+
+            // Moitié droite en haut
+            g2.drawLine(milieu, y + marge, x + marge + taille, y + marge);
+            // Moitié droite en bas
+            g2.drawLine(milieu, y + marge + taille, x + marge + taille, y + marge + taille);
+        } // 3 ALGORITHMES
+        else if (algorithmes.size() == 3) {
+            g2.setColor(COULEUR_CHEMIN);
+            g2.fillRect(x + marge, y + marge, taille, taille);
+        }
+        // Remet l'épaisseur normale pour les autres dessins
+        g2.setStroke(new java.awt.BasicStroke(1f));
     }
 
     // Dessine les cases de départ et d'arrivée avec leurs lettres
@@ -285,9 +378,11 @@ public class PanneauJeu extends JPanel {
             g2.drawLine(0, y, COL * CELL_SIZE, y);
         }
     }
-    
+
     private void drawSelection(Graphics2D g2) {
-        if (caseSelectionnee == null) return;
+        if (caseSelectionnee == null) {
+            return;
+        }
 
         int x = caseSelectionnee.x * CELL_SIZE;
         int y = caseSelectionnee.y * CELL_SIZE;
@@ -352,29 +447,29 @@ public class PanneauJeu extends JPanel {
     // Anime progressivement les nœuds explorés pendant la recherche
     public void animerRecherche(MoteurJeu.Algorithme algorithme, List<Point> noeudsExplores,
             List<Point> chemin, ResultatRecherche resultat, FenetreJeu fenetre, Runnable finAnimation) {
- 
+
         exploredNodesParAlgo.clear();
         cheminParAlgo.clear();
         exploredNodesParAlgo.put(algorithme, new ArrayList<>());
- 
+
         final int[] index = {0};
- 
+
         timerRecherche = new Timer(50, e -> {
             if (index[0] >= noeudsExplores.size()) {
                 timerRecherche.stop();
- 
+
                 cheminParAlgo.put(algorithme, chemin);
                 repaint();
- 
+
                 fenetre.setNoeudsExplores(resultat.getNoeudsExplores());
                 fenetre.setLongueurChemin(resultat.getLongueurChemin());
                 fenetre.setCout(resultat.getCout());
                 fenetre.setTempsExecution(resultat.getTempsExecutionMs());
- 
+
                 animerChemin(chemin, finAnimation);
                 return;
             }
- 
+
             exploredNodesParAlgo.get(algorithme).add(new Point(noeudsExplores.get(index[0])));
             repaint();
             index[0]++;
@@ -385,31 +480,31 @@ public class PanneauJeu extends JPanel {
     // Anime les 3 algorithmes simultanément (mode comparaison)
     public void animerComparaison(Map<MoteurJeu.Algorithme, ResultatRecherche> resultats,
             FenetreJeu fenetre, Runnable finAnimation) {
- 
+
         exploredNodesParAlgo.clear();
         cheminParAlgo.clear();
- 
+
         for (MoteurJeu.Algorithme algo : resultats.keySet()) {
             exploredNodesParAlgo.put(algo, new ArrayList<>());
         }
- 
+
         // Chaque algorithme avance à son propre rythme : on continue tant que le plus long des 3 n'a pas fini de révéler ses cases explorées
         int maxExplores = resultats.values().stream()
-            .mapToInt(r -> r.getOrdreExploration().size())
-            .max().orElse(0);
- 
+                .mapToInt(r -> r.getOrdreExploration().size())
+                .max().orElse(0);
+
         final int[] index = {0};
- 
+
         timerRecherche = new Timer(50, e -> {
             if (index[0] >= maxExplores) {
                 timerRecherche.stop();
- 
+
                 // Affiche les chemins finaux de chaque algorithme
                 for (Map.Entry<MoteurJeu.Algorithme, ResultatRecherche> entry : resultats.entrySet()) {
                     cheminParAlgo.put(entry.getKey(), entry.getValue().getChemin());
                 }
                 repaint();
- 
+
                 // Remplit les 3 cartes de résultats + le tableau de comparaison
                 for (Map.Entry<MoteurJeu.Algorithme, ResultatRecherche> entry : resultats.entrySet()) {
                     ResultatRecherche r = entry.getValue();
@@ -419,26 +514,26 @@ public class PanneauJeu extends JPanel {
                     fenetre.setCout(r.getCout());
                     fenetre.setTempsExecution(r.getTempsExecutionMs());
                 }
- 
+
                 if (finAnimation != null) {
                     finAnimation.run();
                 }
                 return;
             }
- 
+
             for (Map.Entry<MoteurJeu.Algorithme, ResultatRecherche> entry : resultats.entrySet()) {
                 List<Point> ordre = entry.getValue().getOrdreExploration();
                 if (index[0] < ordre.size()) {
                     exploredNodesParAlgo.get(entry.getKey()).add(new Point(ordre.get(index[0])));
                 }
             }
- 
+
             repaint();
             index[0]++;
         });
         timerRecherche.start();
     }
-    
+
     // Une case est une intersection si elle a 3 passages ouverts ou plus autour d'elle
     private boolean estIntersection(int row, int col) {
         int voisinsOuverts = 0;
@@ -452,16 +547,21 @@ public class PanneauJeu extends JPanel {
         }
         return voisinsOuverts >= 3;
     }
-    
+
     private void gererClicSouris(java.awt.event.MouseEvent e) {
-        if (!moteurJeu.isModeEditionSensUnique()) return;
+        if (!moteurJeu.isModeEditionSensUnique()) {
+            return;
+        }
 
         int col = e.getX() / CELL_SIZE;
         int row = e.getY() / CELL_SIZE;
 
-        if (row < 0 || row >= ROWS || col < 0 || col >= COL) return;
-        if (maze[row][col]) return; // clic sur un mur → ignore
-
+        if (row < 0 || row >= ROWS || col < 0 || col >= COL) {
+            return;
+        }
+        if (maze[row][col]) {
+            return; // clic sur un mur → ignore
+        }
         java.awt.Point nouvelle = new java.awt.Point(col, row);
 
         if (caseSelectionnee == null) {
@@ -478,8 +578,8 @@ public class PanneauJeu extends JPanel {
             if ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) {
                 // Adjacent → bascule le sens unique
                 moteurJeu.toggleSensUnique(
-                    caseSelectionnee.x, caseSelectionnee.y,
-                    nouvelle.x, nouvelle.y
+                        caseSelectionnee.x, caseSelectionnee.y,
+                        nouvelle.x, nouvelle.y
                 );
                 caseSelectionnee = null; // on efface la sélection après l'action
             } else {
